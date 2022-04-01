@@ -20,22 +20,22 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.internal.Workbench;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import dependencyscanner.ui.WindowBuilder;
 import dependencyscanner.util.StorageUtil;
 import pss.model.CveItem;
 import pss.model.Dependency;
@@ -49,6 +49,25 @@ public class SampleHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		Job job = new Job("Dependency scanner") { 
+		    @Override 
+		    protected IStatus run(IProgressMonitor monitor) { 
+		        monitor.beginTask("Checking for vulnerabilities ...", 100); 
+		        updateDependencyMap();
+		        monitor.done(); 
+		        return Status.OK_STATUS; 
+		    } 
+		}; 
+		job.schedule();
+		
+//		HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().showView(viewId);
+//		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+//		MessageDialog.openInformation(window.getShell(), "Dependency-scanner-2", "placeholder");
+		
+		return null;
+	}
+	
+	private void updateDependencyMap() {
 		IProject current = getCurrentProject();
 		IFile pom = current.getFile("pom.xml");
 		NodeList nodes = parseXmlAndGetNodes(pom, "dependency");
@@ -62,11 +81,6 @@ public class SampleHandler extends AbstractHandler {
 			this.validFromStorage.mergeMaps(dependencyMap);
 			StorageUtil.storeData(this.validFromStorage);
 		}
-		WindowBuilder window = new WindowBuilder();
-//		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-//		MessageDialog.openInformation(window.getShell(), "Dependency-scanner-2", "placeholder");
-		
-		return null;
 	}
 	
 	private static IProject getCurrentProject(){    

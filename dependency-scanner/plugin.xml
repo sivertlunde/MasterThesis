@@ -31,32 +31,83 @@
       </key>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         point="org.eclipse.ui.popupMenus">
+      <!-- Special case context menu for simple projects that have java natures -->
+      <objectContribution
+            adaptable="true"
+            id="dependencyscanner.ProjectActions"
+            objectClass="org.eclipse.core.resources.IProject">
          <menu
-               id="dependency-scanner.menus.sampleMenu"
-               label="Custom Plug-in"
-               mnemonic="M">
-            <command
-                  commandId="dependency-scanner.commands.sampleCommand"
-                  id="dependency-scanner.menus.sampleCommand"
-                  mnemonic="S">
-            </command>
+               id="dependencyscanner"
+               label="Dependency Scanner"
+               path="group.build">
+            <separator name="doit" />
+            <separator name="save" />
          </menu>
-      </menuContribution>
-      <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="dependency-scanner.toolbars.sampleToolbar">
-            <command
-                  id="dependency-scanner.toolbars.sampleCommand"
-                  commandId="dependency-scanner.commands.sampleCommand"
-                  icon="icons/sample.png"
-                  tooltip="Say hello world">
-            </command>
-         </toolbar>
-      </menuContribution>
+           <command
+                 commandId="dependency-scanner.commands.sampleCommand"
+                 id="dependency-scanner.menus.sampleCommand"
+                 mnemonic="S">
+           </command>
+           <action
+                 class="dependencyscanner.actions.ScanDependenciesAction"
+                 enablesFor="1"
+                 icon="icons/refresh.png"
+                 id="dependencyscanner.scanDependencies"
+                 label="Scan for vulnerabilities"
+                 menubarPath="dependencyscanner/scan">
+           </action>
+           <action
+                 class="dependencyscanner.actions.OpenResultsAction"
+                 enablesFor="1"
+                 icon="icons/file_obj.png"
+                 id="dependencyscanner.openResults"
+                 label="Open Analysis Results in Editor"
+                 menubarPath="dependencyscanner/open">
+           </action>
+
+           <visibility>
+              <objectState
+                    name="nature"
+                    value="org.eclipse.jdt.core.javanature">
+              </objectState>
+           </visibility>
+
+      </objectContribution>
+
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="dependency-scanner"
+            name="Sample Category">
+      </category>
+      <view
+            category="dependency-scanner"
+            class="dependencyscanner.views.SampleView"
+            icon="icons/sample.png"
+            id="dependencyscanner.views.SampleView"
+            inject="true"
+            name="Sample View">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="dependencyscanner.views.SampleView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
    </extension>
 
 </plugin>
