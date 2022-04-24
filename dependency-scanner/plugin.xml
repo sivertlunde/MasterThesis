@@ -62,7 +62,7 @@
                  enablesFor="1"
                  icon="icons/file_obj.png"
                  id="dependencyscanner.openResults"
-                 label="Open Analysis Results in Editor"
+                 label="Open Analysis Results as HTML"
                  menubarPath="dependencyscanner/open">
            </action>
 
@@ -108,6 +108,20 @@
       <contexts
             file="contexts.xml">
       </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="dependencyscanner.preferences.DependencyScannerPreferencePage"
+            id="dependencyscanner.preferences.DependencyScannerPreferencePage"
+            name="Dependency Scanner Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="dependencyscanner.preferences.PreferenceInitializer">
+      </initializer>
    </extension>
 
 </plugin>

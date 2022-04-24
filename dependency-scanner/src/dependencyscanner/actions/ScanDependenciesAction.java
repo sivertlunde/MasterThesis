@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
@@ -36,6 +37,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import dependency_scanner.Activator;
+import dependencyscanner.preferences.PreferenceConstants;
 import dependencyscanner.util.StorageUtil;
 import pss.model.CveItem;
 import pss.model.Dependency;
@@ -44,7 +47,8 @@ import pss.util.NvdDataFetcher;
 
 public class ScanDependenciesAction implements IObjectActionDelegate {
 	
-		private static final Integer VALID = -7;
+		private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		private static final Integer VALID = store.getInt(PreferenceConstants.P_DAYS);
 		private DependencyCveMap validFromStorage = new DependencyCveMap();
 
 	    /** The current selection. */
@@ -73,6 +77,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 			    @Override 
 			    protected IStatus run(IProgressMonitor monitor) { 
 			        monitor.beginTask("Checking for vulnerabilities ...", 100); 
+			        int test = VALID;
 			        updateDependencyMap();
 			        monitor.done(); 
 			        return Status.OK_STATUS; 
@@ -92,7 +97,11 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 			List<Dependency> toBeChecked = getValidDataFromStorage(dependencies);
 			if (!toBeChecked.isEmpty()) {
 				Map<Dependency, List<CveItem>> dependencyMap = NvdDataFetcher.fetchData(toBeChecked);
-				this.validFromStorage.mergeMaps(dependencyMap);
+				if (this.validFromStorage.getDependencyMap() != null) {
+					this.validFromStorage.mergeMaps(dependencyMap);
+				} else {
+					this.validFromStorage.setDependencyMap(dependencyMap);
+				}
 				StorageUtil.storeData(this.validFromStorage);
 			}
 		}
@@ -137,23 +146,27 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 		
 		private List<Dependency> getValidDataFromStorage(List<Dependency> dependencies) {
 			DependencyCveMap fromStorage = StorageUtil.fetchData();
-			Map<Dependency, List<CveItem>> validMap = new HashMap<>();
-			List<Dependency> notValid = new ArrayList<>();
-			Date today = new Date();
-			Calendar c = Calendar.getInstance();
-			c.setTime(today);
-			c.add(Calendar.DAY_OF_MONTH, VALID);
-			Date validAfter = c.getTime();
-			for (Dependency d : dependencies) {
-				Dependency dep = fromStorage.containsKey(d);
-				if (dep != null && (dep.getLastChecked().after(validAfter))) {
-					validMap.put(dep, fromStorage.getMapValue(dep));
-				} else {
-					notValid.add(d);
+			if (fromStorage != null) {
+				Map<Dependency, List<CveItem>> validMap = new HashMap<>();
+				List<Dependency> notValid = new ArrayList<>();
+				Date today = new Date();
+				Calendar c = Calendar.getInstance();
+				c.setTime(today);
+				c.add(Calendar.DAY_OF_MONTH, VALID);
+				Date validAfter = c.getTime();
+				for (Dependency d : dependencies) {
+					Dependency dep = fromStorage.containsKey(d);
+					if (dep != null && (dep.getLastChecked().after(validAfter))) {
+						validMap.put(dep, fromStorage.getMapValue(dep));
+					} else {
+						notValid.add(d);
+					}
 				}
+				validFromStorage.setDependencyMap(validMap);
+				return notValid;
+			} else {
+				return dependencies;
 			}
-			validFromStorage.setDependencyMap(validMap);
-			return notValid;
 		}
 	    
 }

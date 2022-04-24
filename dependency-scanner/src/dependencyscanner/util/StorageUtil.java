@@ -13,7 +13,8 @@ public class StorageUtil {
 	
 	private static Activator plugin = Activator.getDefault();
 	private static final String dir = plugin.getStateLocation().toOSString();
-	private static final String filePath = dir + "data.txt";
+	private static final String separator = System.getProperty("file.separator");
+	private static final String filePath = dir + separator + "data.txt";
 	
 	public static boolean storeData(DependencyCveMap map) {
 		try (FileOutputStream fos = new FileOutputStream(filePath, false);
