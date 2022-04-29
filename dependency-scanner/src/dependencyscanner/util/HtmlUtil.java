@@ -20,26 +20,19 @@ public class HtmlUtil {
 	
 	private static DependencyCveMap data;
 	
-	private static void getVulnerableDependencies() {
-		
-	}
-	
 	public static boolean generateHtmlFile(String fileName) {
-		data = StorageUtil.fetchData();
-		data.removeDuplicates();
-        File f = new File(dir + separator + fileName);
+		
+        File file = new File(dir + separator + fileName + separator + "results.html");
+        file.getParentFile().mkdirs();
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         BufferedWriter bw;
         try {
-        	bw = new BufferedWriter(new FileWriter(f));
-        	bw.write("<html><body><h1>Vulnerable dependencies</h1>");
-            bw.write("<div>");
-            for (Map.Entry<Dependency, List<CveItem>> entry : data.getDependencyMap().entrySet()) {
-            	if (!entry.getValue().isEmpty()) {
-            		generateDependencyHtml(bw, entry.getKey(), entry.getValue());
-            	}
-            }
-            bw.write("</div>");
-            bw.write("</body></html>");
+        	bw = new BufferedWriter(new FileWriter(file));
+        	bw.write(generateHtmlFileString(fileName));
             bw.close();
             return true;
         } catch(IOException e) {
@@ -49,48 +42,90 @@ public class HtmlUtil {
         
     }
 	
-	private static void generateDependencyHtml(BufferedWriter bw, Dependency dep, List<CveItem> items) throws IOException {
-		bw.write("<div style=\"display:flex;\">");
-		bw.write("<h4 style=\"width:33%\">" + 
-				 "GroupId: " + dep.getGroupId() + 
-				 "</h4>");
-		bw.write("<h4 style=\"width:33%\">" + 
-				 "ArtifactId: " + dep.getArtifactId() +
-				 "</h4>");
-		bw.write("<h4 style=\"width:33%\">" + 
-				 "Version: " + dep.getVersion() + 
-				 "</h4>");
-		bw.write("</div>");
-		for (CveItem item : items) {
-			generateCveItemHtml(bw, item);
+	private static String generateHtmlFileString(String fileName) {
+		data = StorageUtil.fetchData(fileName, false);
+		data.removeDuplicates();
+		data.removeNonVulnerableDependencies();
+		DependencyCveMap deleted = StorageUtil.fetchDeleted();
+		if (deleted != null) {
+			data.removeDeletedDependencies(deleted);
 		}
+		StringBuilder html = new StringBuilder();
+		html.append("<html><body><h1>Vulnerable dependencies</h1>");
+		html.append("<div>");
+		for (Map.Entry<Dependency, List<CveItem>> entry : data.getDependencyMap().entrySet()) {
+			html.append(generateDependencyHtml(entry.getKey(), entry.getValue()));
+        }
+		html.append("</div>");
+		html.append("</body></html>");
+		return html.toString();
 	}
 	
-	private static void generateCveItemHtml(BufferedWriter bw, CveItem item) throws IOException {
+	public static String generateDependencyHtml(Dependency dep, List<CveItem> items) {
+		StringBuilder html = new StringBuilder();
+		html.append("<div style=\"display:flex;\">");
+		html.append("<h4 style=\"width:33%\">" + 
+				 "GroupId: " + dep.getGroupId() + 
+				 "</h4>");
+		html.append("<h4 style=\"width:33%\">" + 
+				 "ArtifactId: " + dep.getArtifactId() +
+				 "</h4>");
+		html.append("<h4 style=\"width:33%\">" + 
+				 "Version: " + dep.getVersion() != null ? dep.getVersion() : "" + 
+				 "</h4>");
+		html.append("</div>");
+		for (CveItem item : items) {
+			html.append(generateCveItemHtml(item));
+		}
+		return html.toString();
+	}
+	
+	private static String generateCveItemHtml(CveItem item) {
+		StringBuilder html = new StringBuilder();
 		String severity = item.getBaseSeverityV3() != null ? item.getBaseSeverityV3() : item.getBaseSeverityV2();
 		Integer severityScore = item.getBaseScoreV3() != null ? item.getBaseScoreV3() : item.getBaseScoreV2();
-		bw.write("<div style=\"border: 1px solid; border-radius: 4px\">");
-		bw.write("<p style=\"margin:5px\">" + 
+		String color = getTextColor(severity);
+		String backgroundColor = getBackgroundColor(severity);
+		html.append("<div style=\"border: 1px solid; border-radius: 4px\">");
+		html.append("<p style=\"margin:5px\">" + 
 				 item.getCveId() + 
 				 "</p>");
-		bw.write("<p style=\"margin:5px\">" + 
+		html.append("<p style=\"margin:5px\">" + 
 				 item.getDescription() + 
 				 "</p>");
-		bw.write("<p style=\"margin:5px\">" + 
-				 "Severity: <span style=\"color:red\">" + severity + " " + severityScore + 
+		html.append("<p style=\"margin:5px\">" + 
+				 "Severity: <span style=\"color:" + color + ";background-color:" 
+				+ backgroundColor + "\">" + severity + " " + severityScore + 
 				 "</span></p>");
 		if (item.getCweId() != null) {
-			bw.write("<p style=\"margin:5px\">" + 
+			html.append("<p style=\"margin:5px\">" + 
 					 "CWE: <a href=\"https://cwe.mitre.org/data/definitions/" + 
 					item.getCweId().toLowerCase().replaceAll("cwe-", "") + ".html\">" + item.getCweId() +
 					 "</a></p>");
 		}
 		
-		bw.write("</div>");
+		html.append("</div>");
+		return html.toString();
 	}
 	
 	public static String getFilePath(String fileName) {
-		return dir + separator + fileName;
+		return dir + separator + fileName + separator + "results.html";
+	}
+	
+	private static String getBackgroundColor(String severity) {
+		if (severity.toLowerCase().equals("low")) {
+			return "yellow";
+		} else if (severity.toLowerCase().equals("medium")) {
+			return "orange";
+		} else if (severity.toLowerCase().equals("high")) {
+			return "red";
+		} else {
+			return "black";
+		}
+	}
+	
+	private static String getTextColor(String severity) {
+		return severity.toLowerCase().equals("critical") ? "#ECECEC" : "black";
 	}
 
 }

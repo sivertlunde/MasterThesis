@@ -6,7 +6,7 @@
          point="org.eclipse.ui.commands">
       <category
             id="dependency-scanner.commands.category"
-            name="Sample Category">
+            name="Dependency Scanner">
       </category>
       <command
             categoryId="dependency-scanner.commands.category"
@@ -58,6 +58,14 @@
                  menubarPath="dependencyscanner/scan">
            </action>
            <action
+                 class="dependencyscanner.actions.OpenResultsTabAction"
+                 enablesFor="1"
+                 icon="icons/file_obj.png"
+                 id="dependencyscanner.openResultsTab"
+                 label="Open Analysis Results Tab"
+                 menubarPath="dependencyscanner/open">
+           </action>
+           <action
                  class="dependencyscanner.actions.OpenResultsAction"
                  enablesFor="1"
                  icon="icons/file_obj.png"
@@ -80,15 +88,15 @@
          point="org.eclipse.ui.views">
       <category
             id="dependency-scanner"
-            name="Sample Category">
+            name="Dependency Scanner">
       </category>
       <view
             category="dependency-scanner"
-            class="dependencyscanner.views.SampleView"
+            class="dependencyscanner.views.DependencyResultsView"
             icon="icons/sample.png"
-            id="dependencyscanner.views.SampleView"
+            id="dependencyscanner.views.DependencyResultsView"
             inject="true"
-            name="Sample View">
+            name="Dependency Scan Results">
       </view>
    </extension>
    <extension
@@ -96,7 +104,7 @@
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
-               id="dependencyscanner.views.SampleView"
+               id="dependencyscanner.views.DependencyResultsView"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
@@ -122,6 +130,16 @@
       <initializer
             class="dependencyscanner.preferences.PreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         id="vulnerableDependency"
+         name="Vulnerable Dependency"
+         point="org.eclipse.core.resources.markers">
+         <super type="org.eclipse.core.resources.problemmarker"/>
+         <attribute name="artifactId" />
+         <attribute name="groupId" />
+         <attribute name="version" />
+         <persistent value="true" />
    </extension>
 
 </plugin>

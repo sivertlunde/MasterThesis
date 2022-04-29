@@ -13,17 +13,23 @@ public class Dependency implements Serializable {
 	private String artifactId;
 	private String version;
 	private Date lastChecked;
+	private Integer lineNumber;
+	private String project;
 
 	public Dependency() {}
 	
-	public Dependency(String groupId, String artifactId, String version, Date lastChecked) {
+	public Dependency(String groupId, String artifactId, String version, Date lastChecked, Integer lineNumber, String project) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
 		this.lastChecked = lastChecked;
+		this.lineNumber = lineNumber;
+		this.project = project;
 	}
 
 	public Dependency(Node node) {
+		String number = (String) node.getUserData("lineNumber");
+		this.lineNumber = Integer.valueOf(number);
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
 			String name = nodes.item(i).getNodeName();
@@ -83,6 +89,22 @@ public class Dependency implements Serializable {
 
 	public void setLastChecked(Date lastChecked) {
 		this.lastChecked = lastChecked;
+	}
+
+	public Integer getLineNumber() {
+		return lineNumber;
+	}
+
+	public void setLineNumber(Integer lineNumber) {
+		this.lineNumber = lineNumber;
+	}
+
+	public String getProject() {
+		return project;
+	}
+
+	public void setProject(String project) {
+		this.project = project;
 	}
 
 	@Override

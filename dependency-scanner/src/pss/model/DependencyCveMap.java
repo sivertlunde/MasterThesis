@@ -1,5 +1,6 @@
 package pss.model;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,32 @@ public class DependencyCveMap implements Serializable {
 			}
 		}
 		this.dependencyMap = duplicateFree;
+	}
+	
+	public void removeNonVulnerableDependencies() {
+		Map<Dependency, List<CveItem>> vulnerableMap = new HashMap<>();
+		for (Map.Entry<Dependency, List<CveItem>> entry : dependencyMap.entrySet()) {
+        	if (!entry.getValue().isEmpty()) {
+        		vulnerableMap.put(entry.getKey(), entry.getValue());
+        	}
+        }
+		this.dependencyMap = vulnerableMap;
+	}
+	
+	public void removeDeletedDependencies(DependencyCveMap deleted) {
+		Map<Dependency, List<CveItem>> nonDeleted = new HashMap<>();
+		boolean found = false;
+		for (Dependency dep : this.dependencyMap.keySet()) {
+			for (Dependency dep2 : deleted.getDependencyMap().keySet()) {
+				if (dep.equals(dep2)) {
+					found = true;
+				}
+			}
+			if (!found) {
+				nonDeleted.put(dep, this.dependencyMap.get(dep));
+			}
+		}
+		this.dependencyMap = nonDeleted;
 	}
 	
 	public List<CveItem> getMapValue(Dependency key) {

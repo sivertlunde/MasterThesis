@@ -1,28 +1,19 @@
 package dependencyscanner.actions;
 
-import java.net.URL;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import dependencyscanner.util.HtmlUtil;
+import dependencyscanner.util.StorageUtil;
 import dependencyscanner.util.WorkspaceUtil;
+import dependencyscanner.views.DependencyResultsView;
 
-public class OpenResultsAction implements IObjectActionDelegate {
+public class OpenResultsTabAction implements IObjectActionDelegate {
 
 	/** The current selection. */
     protected ISelection selection;
@@ -47,9 +38,28 @@ public class OpenResultsAction implements IObjectActionDelegate {
     @Override
     public void run(final IAction action) {
     	String projectName = WorkspaceUtil.getName(selection);
-    	HtmlUtil.generateHtmlFile(projectName);
-    	Program p = Program.findProgram("html");
-    	p.execute(HtmlUtil.getFilePath(projectName));
+    	StorageUtil.fetchData(projectName, true);
+    	if (!updateTabIfOpen()) {
+        	try {
+    			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+    					.showView("dependencyscanner.views.DependencyResultsView");
+    		} catch (PartInitException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	
     }
     
+    private boolean updateTabIfOpen() {
+    	IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IViewPart view = page.findView("dependencyscanner.views.DependencyResultsView");
+		if (view != null && view instanceof DependencyResultsView) {
+			DependencyResultsView myView = (DependencyResultsView)view;
+			myView.updateView();
+			myView.setFocus();
+			return true;
+		}
+		return false;
+    }
+
 }
