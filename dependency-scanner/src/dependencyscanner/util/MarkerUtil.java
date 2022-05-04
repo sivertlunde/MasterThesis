@@ -17,6 +17,11 @@ public class MarkerUtil {
 	
 	public static void addMarkers(IFile file, DependencyCveMap map) {
 		map.removeNonVulnerableDependencies();
+		map.removeDuplicates();
+		DependencyCveMap deleted = StorageUtil.fetchDeleted();
+		if (deleted != null) {
+			map.removeDeletedDependencies(deleted);
+		}
 		for (Dependency dep : map.getDependencyMap().keySet()) {
 			createMarker(file, dep);
 		}
@@ -27,7 +32,7 @@ public class MarkerUtil {
  
         attributes.put(IMarker.LINE_NUMBER, dep.getLineNumber());
         attributes.put(IMarker.SEVERITY, Integer.valueOf(IMarker.SEVERITY_WARNING));
-        attributes.put(IMarker.MESSAGE, "This dependency may be vulnerable");
+        attributes.put(IMarker.MESSAGE, "The dependency [" + dep.getGroupId() + "] may be vulnerable");
         
         try {
 			IMarker marker = file.createMarker(MARKER_TYPE);

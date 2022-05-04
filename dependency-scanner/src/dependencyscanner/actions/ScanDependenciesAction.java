@@ -119,7 +119,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 			} else {
 				this.validDependencyData.setDependencyMap(dependencyMap);
 			}
-			
+			this.validDependencyData.removeNonApplicableVersion();
 			StorageUtil.storeData(this.validDependencyData, projectID);
 		} else {
 			StorageUtil.storeToLocation(validDependencyData, "default");

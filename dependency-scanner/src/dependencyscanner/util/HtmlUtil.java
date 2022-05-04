@@ -63,16 +63,19 @@ public class HtmlUtil {
 	
 	public static String generateDependencyHtml(Dependency dep, List<CveItem> items) {
 		StringBuilder html = new StringBuilder();
-		html.append("<div style=\"display:flex;\">");
+		html.append("<div>");
 		html.append("<h4 style=\"width:33%\">" + 
 				 "GroupId: " + dep.getGroupId() + 
 				 "</h4>");
 		html.append("<h4 style=\"width:33%\">" + 
 				 "ArtifactId: " + dep.getArtifactId() +
 				 "</h4>");
-		html.append("<h4 style=\"width:33%\">" + 
-				 "Version: " + dep.getVersion() != null ? dep.getVersion() : "" + 
-				 "</h4>");
+		if (dep.getVersion() != null) {
+			html.append("<h4 style=\"width:33%\">" + 
+					"Version: " + dep.getVersion() + 
+					 "</h4>");
+		}
+				 
 		html.append("</div>");
 		for (CveItem item : items) {
 			html.append(generateCveItemHtml(item));
@@ -97,7 +100,8 @@ public class HtmlUtil {
 				 "Severity: <span style=\"color:" + color + ";background-color:" 
 				+ backgroundColor + "\">" + severity + " " + severityScore + 
 				 "</span></p>");
-		if (item.getCweId() != null) {
+		
+		if (item.getCweId().toLowerCase().matches("cwe\\-.*")) {
 			html.append("<p style=\"margin:5px\">" + 
 					 "CWE: <a href=\"https://cwe.mitre.org/data/definitions/" + 
 					item.getCweId().toLowerCase().replaceAll("cwe-", "") + ".html\">" + item.getCweId() +
