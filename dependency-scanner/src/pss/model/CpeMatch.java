@@ -59,7 +59,10 @@ public class CpeMatch implements Serializable {
 		String[] endNumbers = end != null ? end.split("\\.") : new String[0];
 		boolean startChecked = false;
 		boolean endChecked = false;
-		for (int i = 0; i < version.length; i++) {
+		int vLength = version.length;
+		int sLength = startNumbers.length;
+		int eLength = endNumbers.length;
+		for (int i = 0; i < vLength; i++) {
 			if (!isNumeric(version[i])) {
 				return true;
 			}
@@ -75,20 +78,20 @@ public class CpeMatch implements Serializable {
 			if (startChecked && endChecked) {
 				return true;
 			}
-			if (startIncl && endIncl) {
-				if (!((s == -1 || ver >= s || startChecked) && (e == -1 || ver <= e || endChecked))) {
+			if ((startIncl && endIncl) || hasNotReachedSomeLastIndex(i, vLength, sLength, eLength)) {
+				if (!((ver == s || startChecked) && (e == -1 || ver == e || endChecked))) {
 					return false;
 				}
 			} else if (startIncl) {
-				if (!((s == -1 || ver >= s || startChecked) && (e == -1 || ver < e || endChecked))) {
+				if (!((ver == s || startChecked) && (e == -1 || endChecked || (ver == e && i+1 < eLength)))) {
 					return false;
 				}
 			} else if (endIncl) {
-				if (!((s == -1 || ver > s || startChecked) && (e == -1 || ver <= e || endChecked))) {
+				if (!((startChecked || (ver == s && i+1 < vLength)) && (e == -1 || ver == e || endChecked))) {
 					return false;
 				}
 			} else {
-				if (!((s == -1 || ver > s || startChecked) && (e == -1 || ver < e || endChecked))) {
+				if (!((startChecked || (ver == s && i+1 < vLength)) && (e == -1 || endChecked || (ver == e && i+1 < eLength)))) {
 					return false;
 				}
 			}
@@ -96,12 +99,17 @@ public class CpeMatch implements Serializable {
 		return true;
 	}
 	
+	private boolean hasNotReachedSomeLastIndex(int i, int v, int s, int e) {
+		int x = i+1;
+		return x < v && x < s && x < e;
+	}
+	
 	private boolean isNumeric(String strNum) {
 	    if (strNum == null) {
 	        return false;
 	    }
 	    try {
-	        int i = Integer.parseInt(strNum);
+	        Integer.parseInt(strNum);
 	    } catch (NumberFormatException nfe) {
 	        return false;
 	    }

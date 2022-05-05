@@ -73,7 +73,14 @@ public class StorageUtil {
 	public static boolean updateDeleted(Dependency dep, List<CveItem> items) {
 		DependencyCveMap deleted = fetchData("deleted", false);
 		if (deleted != null) {
-			deleted.getDependencyMap().put(dep, items);
+			Dependency fromDeleted = deleted.containsKey(dep);
+			if (fromDeleted != null) {
+				List<CveItem> deletedItems = deleted.getMapValue(fromDeleted);
+				deletedItems.addAll(items);
+				deleted.getDependencyMap().put(fromDeleted, deletedItems);
+			} else {
+				deleted.getDependencyMap().put(dep, items);
+			}
 		} else {
 			deleted = new DependencyCveMap();
 			Map<Dependency, List<CveItem>> map = new HashMap<>();

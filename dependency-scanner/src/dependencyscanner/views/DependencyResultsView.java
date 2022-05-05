@@ -10,10 +10,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -28,7 +26,6 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -72,9 +69,7 @@ public class DependencyResultsView extends ViewPart {
 	@Inject IWorkbench workbench;
 	
 	private TableViewer viewer;
-	private Action action1;
-	private Action action2;
-	private Action action3;
+	private Action removeAction;
 	private Action doubleClickAction;
 	private Browser browser;
 	
@@ -148,7 +143,6 @@ public class DependencyResultsView extends ViewPart {
 		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
-		contributeToActionBars();
 		browser = new Browser(parent, SWT.BORDER);
 		if (data != null) {
 			browser.setText("Double-click a vulnerability in the list to view more information");
@@ -194,30 +188,14 @@ public class DependencyResultsView extends ViewPart {
 		getSite().registerContextMenu(menuMgr, viewer);
 	}
 
-	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
-//		fillLocalPullDown(bars.getMenuManager());
-//		fillLocalToolBar(bars.getToolBarManager());
-	}
-
-	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(new Separator());
-		manager.add(action2);
-	}
-
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(action1);
+		manager.add(removeAction);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
-	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(action3);
-	}
-
 	private void makeActions() {
-		action1 = new Action() {
+		removeAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = viewer.getStructuredSelection();
 				Object obj = selection.getFirstElement();
@@ -236,28 +214,10 @@ public class DependencyResultsView extends ViewPart {
 				}
 			}
 		};
-		action1.setText("Remove");
-		action1.setToolTipText("Remove dependency from list");
-		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+		removeAction.setText("Remove");
+		removeAction.setToolTipText("Remove dependency from list");
+		removeAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 			getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
-		
-		action2 = new Action() {
-			public void run() {
-				showMessage("Action 2 executed");
-			}
-		};
-		action2.setText("Action 2");
-		action2.setToolTipText("Action 2 tooltip");
-		action2.setImageDescriptor(workbench.getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
-		action3 = new Action() {
-			public void run() {
-				browser.back();
-			}
-		};
-		action3.setText("Go back");
-		action3.setToolTipText("Go back to the previous page in the browser");
 		
 		doubleClickAction = new Action() {
 			public void run() {
@@ -268,7 +228,6 @@ public class DependencyResultsView extends ViewPart {
 				String html = HtmlUtil.generateDependencyHtml(dep, items);
 				browser.setText(html);
 				currentlyInBrowser = dep;
-//				showMessage("Double-click detected on "+obj.toString());
 			}
 		};
 	}
@@ -279,12 +238,6 @@ public class DependencyResultsView extends ViewPart {
 				doubleClickAction.run();
 			}
 		});
-	}
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"Sample View",
-			message);
 	}
 
 	@Override

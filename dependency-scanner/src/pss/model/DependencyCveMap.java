@@ -1,9 +1,7 @@
 package pss.model;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,27 +32,6 @@ public class DependencyCveMap implements Serializable {
 		}
 		return null;
 	}
-	
-//	public void removeDuplicates() {
-//		Map<Dependency, List<CveItem>> duplicateFree = new HashMap<>();
-//		boolean identical = false;
-//		for (Dependency dep : this.dependencyMap.keySet()) {
-//			identical = false;
-//			if (duplicateFree.isEmpty()) {
-//				duplicateFree.put(dep, this.dependencyMap.get(dep));
-//			} else {
-//				for (Dependency dep2 : duplicateFree.keySet()) {
-//					if (dep.equals(dep2)) {
-//						identical = true;
-//					}
-//				}
-//				if (!identical) {
-//					duplicateFree.put(dep, this.dependencyMap.get(dep));
-//				}
-//			}
-//		}
-//		this.dependencyMap = duplicateFree;
-//	}
 	
 	public void removeDuplicates() {
 		List<Dependency> duplicates;

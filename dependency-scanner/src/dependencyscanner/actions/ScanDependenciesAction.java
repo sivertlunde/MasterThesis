@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,7 +48,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 
 	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 	private static final Integer VALID = store.getInt(PreferenceConstants.P_DAYS);
-	private DependencyCveMap validDependencyData = new DependencyCveMap();
+	private DependencyCveMap validDependencyData;
 	private IProject currentProject;
 	private IFile pom;
 	private String projectID = "default";
@@ -84,7 +83,6 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 				updateDependencyMap(subMonitor);
 				MarkerUtil.deleteMarkers(pom);
 				MarkerUtil.addMarkers(pom, validDependencyData);
-				IMarker[] markers = MarkerUtil.getMarkers(pom);
 				openResultsTab();
 				return Status.OK_STATUS;
 			}
@@ -128,6 +126,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 	}
 	
 	private void initiateVariables() {
+		validDependencyData = new DependencyCveMap();
 		currentProject = WorkspaceUtil.getCurrentProject(selection);
 		pom = currentProject.getFile("pom.xml");
 		projectID = WorkspaceUtil.getName(selection);
@@ -143,6 +142,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 				if (view != null && view instanceof DependencyResultsView) {
 					DependencyResultsView myView = (DependencyResultsView)view;
 					myView.updateView();
+					myView.setFocus();
 				} else {
 					try {
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()

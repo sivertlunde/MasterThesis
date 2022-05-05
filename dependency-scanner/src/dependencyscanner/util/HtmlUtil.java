@@ -64,14 +64,14 @@ public class HtmlUtil {
 	public static String generateDependencyHtml(Dependency dep, List<CveItem> items) {
 		StringBuilder html = new StringBuilder();
 		html.append("<div>");
-		html.append("<h4 style=\"width:33%\">" + 
+		html.append("<h4>" + 
 				 "GroupId: " + dep.getGroupId() + 
 				 "</h4>");
-		html.append("<h4 style=\"width:33%\">" + 
+		html.append("<h4>" + 
 				 "ArtifactId: " + dep.getArtifactId() +
 				 "</h4>");
 		if (dep.getVersion() != null) {
-			html.append("<h4 style=\"width:33%\">" + 
+			html.append("<h4>" + 
 					"Version: " + dep.getVersion() + 
 					 "</h4>");
 		}
