@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
 import dependency_scanner.Activator;
 import pss.model.CveItem;
 import pss.model.Dependency;
@@ -34,6 +39,7 @@ public class StorageUtil {
 		String filePath = dir + separator + location + separator + "data.txt";
 		File file = new File(filePath);
 		file.getParentFile().mkdirs();
+		
 		try {
 			file.createNewFile();
 		} catch (IOException e) {

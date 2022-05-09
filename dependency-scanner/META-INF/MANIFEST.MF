@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Dependency-scanner
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: dependency-scanner;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.6
 Bundle-Activator: dependency_scanner.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -14,3 +14,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: dependency-scanner
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jdt.internal.ui
+Export-Package: dependency_scanner,
+ dependencyscanner.actions,
+ dependencyscanner.preferences,
+ dependencyscanner.util,
+ dependencyscanner.views,
+ pss.model,
+ pss.util

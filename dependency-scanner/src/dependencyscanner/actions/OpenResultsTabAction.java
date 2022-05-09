@@ -39,27 +39,8 @@ public class OpenResultsTabAction implements IObjectActionDelegate {
     public void run(final IAction action) {
     	String projectName = WorkspaceUtil.getName(selection);
     	StorageUtil.fetchData(projectName, true);
-    	if (!updateTabIfOpen()) {
-        	try {
-    			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-    					.showView("dependencyscanner.views.DependencyResultsView");
-    		} catch (PartInitException e) {
-    			e.printStackTrace();
-    		}
-    	}
+    	WorkspaceUtil.openResultsTab();
     	
-    }
-    
-    private boolean updateTabIfOpen() {
-    	IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		IViewPart view = page.findView("dependencyscanner.views.DependencyResultsView");
-		if (view != null && view instanceof DependencyResultsView) {
-			DependencyResultsView myView = (DependencyResultsView)view;
-			myView.updateView();
-			myView.setFocus();
-			return true;
-		}
-		return false;
     }
 
 }

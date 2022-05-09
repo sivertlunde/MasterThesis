@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
@@ -25,6 +26,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.Document;
@@ -76,6 +78,7 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 
 	@Override
 	public void run(final IAction action) {
+
 		Job job = new Job("Dependency scanner") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -83,12 +86,11 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 				updateDependencyMap(subMonitor);
 				MarkerUtil.deleteMarkers(pom);
 				MarkerUtil.addMarkers(pom, validDependencyData);
-				openResultsTab();
+				WorkspaceUtil.openResultsTab();
 				return Status.OK_STATUS;
 			}
 		};
 		job.schedule();
-		
 	}
 
 	private void updateDependencyMap(SubMonitor subMonitor) {
@@ -133,28 +135,6 @@ public class ScanDependenciesAction implements IObjectActionDelegate {
 		projectName = WorkspaceUtil.getProjectName(selection);
 	}
 	
-	private void openResultsTab() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				IViewPart view = page.findView("dependencyscanner.views.DependencyResultsView");
-				if (view != null && view instanceof DependencyResultsView) {
-					DependencyResultsView myView = (DependencyResultsView)view;
-					myView.updateView();
-					myView.setFocus();
-				} else {
-					try {
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-								.showView("dependencyscanner.views.DependencyResultsView");
-					} catch (PartInitException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-	}
-
 	private static NodeList parseXmlAndGetNodes(IFile file, String tagName) {
 		try (InputStream is = file.getContents()) {
 			Document doc = PositionalXMLReader.readXML(is);

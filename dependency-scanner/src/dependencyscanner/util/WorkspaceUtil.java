@@ -9,8 +9,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+
+import dependencyscanner.views.DependencyResultsView;
 
 public class WorkspaceUtil {
 	
@@ -66,5 +74,39 @@ public class WorkspaceUtil {
     public static IFile getFileFromProject(String fileName, String projectName) {
     	return getProjectByName(projectName).getFile(fileName);
     }
+    
+    public static void displayMessage(String header, String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(
+		        		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+		                header,
+		                message);
+			}
+		});
+	}
+    
+    public static void openResultsTab() {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				IViewPart view = page.findView("dependencyscanner.views.DependencyResultsView");
+				if (view != null && view instanceof DependencyResultsView) {
+					DependencyResultsView myView = (DependencyResultsView)view;
+					myView.updateView();
+					myView.setFocus();
+				} else {
+					try {
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+								.showView("dependencyscanner.views.DependencyResultsView");
+					} catch (PartInitException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+	}
 
 }

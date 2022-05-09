@@ -3,34 +3,6 @@
 <plugin>
 
    <extension
-         point="org.eclipse.ui.commands">
-      <category
-            id="dependency-scanner.commands.category"
-            name="Dependency Scanner">
-      </category>
-      <command
-            categoryId="dependency-scanner.commands.category"
-            name="Scan Dependencies"
-            id="dependency-scanner.commands.sampleCommand">
-      </command>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="dependencyscanner.handlers.SampleHandler"
-            commandId="dependency-scanner.commands.sampleCommand">
-      </handler>
-   </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="dependency-scanner.commands.sampleCommand"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6">
-      </key>
-   </extension>
-   <extension
          point="org.eclipse.ui.popupMenus">
       <!-- Special case context menu for simple projects that have java natures -->
       <objectContribution
@@ -44,11 +16,6 @@
             <separator name="doit" />
             <separator name="save" />
          </menu>
-           <command
-                 commandId="dependency-scanner.commands.sampleCommand"
-                 id="dependency-scanner.menus.sampleCommand"
-                 mnemonic="S">
-           </command>
            <action
                  class="dependencyscanner.actions.ScanDependenciesAction"
                  enablesFor="1"
